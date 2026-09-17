@@ -2,6 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const path = require('path');
 const store = require('./store');
+const { DIMENSIONS } = require('./public/dimensions');
 
 const PORT = process.env.PORT || 3003; // 3002는 class-quiz가 쓴다
 const BASE = '/classobs';
@@ -9,10 +10,39 @@ const BASE = '/classobs';
 const LIMITS = {
     title: 100,
     videoUrl: 500,
+    name: 20,
+    evidence: 200,
+    memo: 500,
+    comment: 500,
 };
+
+const STATUSES = ['draft', 'submitted'];
 
 function clip(value, max) {
     return String(value ?? '').trim().slice(0, max);
+}
+
+// 이름은 upsert 키다. 앞뒤·중복 공백 차이로 새 사람이 생기지 않게 정규화한다
+function normalizeName(value) {
+    return String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, LIMITS.name);
+}
+
+// 알려진 차원만 받고, 점수는 1~7 정수(원점수) 아니면 버린다
+function cleanScores(input) {
+    const scores = {};
+    for (const dim of DIMENSIONS) {
+        const entry = input?.[dim.key];
+        if (!entry || typeof entry !== 'object') continue;
+        const s = Number.isInteger(entry.s) && entry.s >= 1 && entry.s <= 7 ? entry.s : null;
+        const ev = clip(entry.ev, LIMITS.evidence);
+        if (s !== null || ev) scores[dim.key] = { s, ev };
+    }
+    return scores;
+}
+
+async function findSession(code) {
+    const sessions = await store.readJson(store.SESSIONS_FILE, []);
+    return sessions.find((s) => s.code === code);
 }
 
 async function submittedCount(code) {
@@ -74,10 +104,73 @@ api.get('/sessions/:code', async (req, res, next) => {
         if (!store.isValidCode(code)) {
             return res.status(400).json({ error: '세션 코드는 숫자 4자리입니다.' });
         }
-        const sessions = await store.readJson(store.SESSIONS_FILE, []);
-        const session = sessions.find((s) => s.code === code);
+        const session = await findSession(code);
         if (!session) return res.status(404).json({ error: '없는 세션 코드입니다.' });
         res.json({ ...session, count: await submittedCount(code) });
+    } catch (err) {
+        next(err);
+    }
+});
+
+api.post('/sessions/:code/submissions', async (req, res, next) => {
+    try {
+        const { code } = req.params;
+        if (!store.isValidCode(code)) {
+            return res.status(400).json({ error: '세션 코드는 숫자 4자리입니다.' });
+        }
+        if (!(await findSession(code))) {
+            return res.status(404).json({ error: '없는 세션 코드입니다.' });
+        }
+
+        const body = req.body || {};
+        const name = normalizeName(body.name);
+        if (!name) return res.status(400).json({ error: '이름을 입력하세요.' });
+        if (!STATUSES.includes(body.status)) {
+            return res.status(400).json({ error: 'status는 draft 또는 submitted입니다.' });
+        }
+
+        const scores = cleanScores(body.scores);
+        if (body.status === 'submitted') {
+            const missing = DIMENSIONS.filter((d) => !scores[d.key]?.s).map((d) => d.key);
+            if (missing.length) {
+                return res.status(400).json({ error: `점수가 비어 있습니다: ${missing.join(', ')}`, missing });
+            }
+        }
+
+        let saved;
+        await store.update(store.submissionsFile(code), [], (list) => {
+            const i = list.findIndex((s) => s.name === name);
+            // 한 번 제출한 사람의 이후 자동 임시저장이 '제출'을 '임시'로 되돌리지 않게 한다
+            const status = i >= 0 && list[i].status === 'submitted' ? 'submitted' : body.status;
+            saved = {
+                name,
+                status,
+                scores,
+                memo: clip(body.memo, LIMITS.memo),
+                comment: clip(body.comment, LIMITS.comment),
+                updatedAt: new Date().toISOString(),
+            };
+            if (i >= 0) list[i] = saved;
+            else list.push(saved);
+            return list;
+        });
+
+        res.json(saved);
+    } catch (err) {
+        next(err);
+    }
+});
+
+api.get('/sessions/:code/submissions', async (req, res, next) => {
+    try {
+        const { code } = req.params;
+        if (!store.isValidCode(code)) {
+            return res.status(400).json({ error: '세션 코드는 숫자 4자리입니다.' });
+        }
+        if (!(await findSession(code))) {
+            return res.status(404).json({ error: '없는 세션 코드입니다.' });
+        }
+        res.json(await store.readJson(store.submissionsFile(code), []));
     } catch (err) {
         next(err);
     }
