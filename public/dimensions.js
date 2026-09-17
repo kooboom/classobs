@@ -6,9 +6,9 @@
 // hint           → 근거 입력란 placeholder. 무엇을 적을지 안내한다.
 
 const DOMAINS = [
-    { key: 'ES', no: 1, name: '정서적 지원', en: 'Emotional Support', question: '학생들이 안전하고 지지받는다고 느끼는가' },
-    { key: 'CO', no: 2, name: '교실 조직', en: 'Classroom Organization', question: '교실이 효율적으로 운영되고 있는가' },
-    { key: 'IS', no: 3, name: '교수적 지원', en: 'Instructional Support', question: '학생들이 깊이 있게 배우고 있는가' },
+    { key: 'ES', no: 1, name: '정서적 지원', short: '정서', en: 'Emotional Support', question: '학생들이 안전하고 지지받는다고 느끼는가' },
+    { key: 'CO', no: 2, name: '교실 조직', short: '조직', en: 'Classroom Organization', question: '교실이 효율적으로 운영되고 있는가' },
+    { key: 'IS', no: 3, name: '교수적 지원', short: '교수', en: 'Instructional Support', question: '학생들이 깊이 있게 배우고 있는가' },
 ];
 
 const DIMENSIONS = [

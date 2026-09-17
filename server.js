@@ -197,7 +197,13 @@ const router = express.Router();
 router.use('/api', api);
 router.use(express.static(path.join(__dirname, 'public')));
 
-app.get(BASE, (req, res) => res.redirect(301, `${BASE}/`));
+// /classobs → /classobs/ (상대 경로가 맞게 풀리도록). Express 라우팅은 끝 슬래시를 구분하지 않아서
+// app.get(BASE) 로 잡으면 /classobs/ 도 걸려 무한 리다이렉트가 된다. 경로를 직접 비교한다.
+app.use((req, res, next) => {
+    if (req.path !== BASE) return next();
+    const query = req.originalUrl.slice(req.originalUrl.indexOf(BASE) + BASE.length);
+    res.redirect(301, `${BASE}/${query}`);
+});
 app.use(BASE, router);
 
 app.listen(PORT, '127.0.0.1', () => {

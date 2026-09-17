@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CLASS 관찰 실습</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap entry">
+    <div class="top">
+        <h1>CLASS 관찰 실습<small>수업행동분석론 · 세션에 입장</small></h1>
+    </div>
+
+    <form id="form" novalidate>
+        <div class="field">
+            <label for="code">세션 코드</label>
+            <input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="0000">
+            <div id="check" class="check" aria-live="polite"></div>
+        </div>
+        <div class="field">
+            <label for="name">이름</label>
+            <input id="name" maxlength="20" autocomplete="name">
+        </div>
+        <button id="go" class="primary" type="submit" disabled>입장</button>
+    </form>
+
+    <footer class="legal">
+        공개된 CLASS 연구 논문을 바탕으로 교육 목적으로 재구성한 실습 도구이며, 공식 Teachstone 인증 도구가 아닙니다. 저작권은 Teachstone Training, LLC에 있습니다.
+    </footer>
+</main>
+
+<script src="storage.js"></script>
+<script src="entry.js"></script>
+</body>
+</html>

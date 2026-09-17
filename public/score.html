@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLASS 채점</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="has-bar">
+<header class="top">
+    <h1><span id="title">CLASS 관찰시트</span><small>Pre-K / K-3 판 · 3개 영역 · 10개 차원 · 1~7점</small></h1>
+    <div class="who"><b id="who"></b><span id="savestate" aria-live="polite"></span></div>
+</header>
+
+<div class="layout">
+    <aside class="stage">
+        <div class="video" id="video">영상 자리 (3단계에서 연결)</div>
+
+        <div class="scale">
+            <div><b>낮음 1–2</b>드물거나 짧고 표면적인 수준</div>
+            <div><b>중간 3–5</b>가끔, 또는 일부 학생에게만</div>
+            <div><b>높음 6–7</b>뚜렷하고 일관되게 지속, 전체 학생</div>
+            <div><b>채점 근거</b>빈도만이 아니라 깊이 · 빈도 · 지속 시간을 함께 본다</div>
+        </div>
+
+        <div class="ncrule">
+            <b>NC는 원점수를 누릅니다.</b> 부정성이 클수록 높은 점수, 거의 없으면 1점 — 방향은 다른 아홉 차원과 같습니다.
+            <b>정서적 지원 평균을 낼 때만 8 − 원점수로 역산</b>합니다. 예: 원점수 2 → 6.
+        </div>
+
+        <p class="keys">
+            <kbd>1</kbd>–<kbd>7</kbd> 점수 · <kbd>↓</kbd><kbd>↑</kbd> 다음·이전 차원 · <kbd>Tab</kbd> 근거 칸으로
+        </p>
+    </aside>
+
+    <main class="work">
+        <div id="dims"></div>
+
+        <div class="memos">
+            <div class="memo">
+                <label for="memo"><b>관찰 메모</b><em>맥락 · 특이사항</em></label>
+                <textarea id="memo" rows="2" maxlength="500"></textarea>
+            </div>
+            <div class="memo">
+                <label for="comment"><b>종합 의견</b><em>교사에게 전달할 것 · 점수로 안 잡히는 인상</em></label>
+                <textarea id="comment" rows="2" maxlength="500"></textarea>
+            </div>
+        </div>
+
+        <div id="notice" class="notice" hidden role="status"></div>
+    </main>
+</div>
+
+<footer class="legal">
+    공개된 CLASS 연구 논문을 바탕으로 교육 목적으로 재구성한 실습 도구이며, 공식 Teachstone 인증 도구가 아닙니다. 저작권은 Teachstone Training, LLC에 있습니다.
+</footer>
+
+<div class="bar">
+    <div class="bar-inner">
+        <div id="averages" style="display:contents"></div>
+        <div class="progress"><b id="progress">0/10</b> 완료</div>
+        <button id="submit" class="submit" type="button">제출</button>
+    </div>
+</div>
+
+<script src="dimensions.js"></script>
+<script src="scoring.js"></script>
+<script src="storage.js"></script>
+<script src="score.js"></script>
+</body>
+</html>

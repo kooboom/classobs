@@ -1,0 +1,270 @@
+/* 기준: reference/CLASS_관찰시트.html — 색·타이포·차원 배열을 종이와 맞춘다.
+   장식 최소화: 그라디언트·그림자·애니메이션 없음.
+   노트북 1280px 기준: 채점 화면이 스크롤 없이 한눈에 들어와야 한다. 여백을 크게 잡지 않는다. */
+
+:root {
+    --navy: #1b3a5f;
+    --navy-bg: #e9eef4;
+    --crimson: #9b2335;
+    --crimson-bg: #fbeef0;
+    --gold: #8a6d2f;
+    --gold-bg: #faf5e8;
+    --line: #b9c3ce;
+    --rule: #8d99a6;
+    --ink: #111;
+    --muted: #4f5a66;
+    --bar-h: 48px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    font-family: 'Malgun Gothic', '맑은 고딕', 'Apple SD Gothic Neo', system-ui, sans-serif;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.4;
+    background: #fff;
+}
+
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
+
+/* ── 머리 ─────────────────────── */
+.top {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    border-bottom: 2px solid var(--navy);
+    padding: 6px 16px 4px;
+}
+.top h1 { font-size: 16px; color: var(--navy); letter-spacing: -0.3px; }
+.top h1 small { font-size: 12px; font-weight: normal; color: var(--muted); margin-left: 8px; letter-spacing: 0; }
+.top .who { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.top .who b { color: var(--navy); font-size: 14px; margin-right: 8px; }
+
+/* ── 좌우 2단 (4:6) ───────────── */
+.layout {
+    display: grid;
+    grid-template-columns: 4fr 6fr;
+    gap: 16px;
+    padding: 6px 16px 0;
+    align-items: start;
+}
+.stage {
+    position: sticky; top: 6px;
+}
+.work { min-width: 0; }
+
+/* 영상 자리 — 3단계에서 YouTube 플레이어가 들어온다 */
+.video {
+    aspect-ratio: 16 / 9;
+    background: #000; color: #8d99a6;
+    display: grid; place-items: center;
+    font-size: 13px;
+}
+
+/* ── 척도 + NC 규칙 (좌측 단) ─── */
+.scale {
+    display: grid; grid-template-columns: 1fr 1fr;
+    margin-top: 8px;
+    border: 1px solid var(--line);
+}
+.scale div {
+    padding: 4px 8px; font-size: 12px; color: var(--muted);
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.scale div:nth-child(2n) { border-right: none; }
+.scale div:nth-child(n+3) { border-bottom: none; }
+.scale b { color: var(--navy); display: block; font-size: 13px; }
+
+.ncrule {
+    background: var(--crimson-bg);
+    border-left: 3px solid var(--crimson);
+    padding: 5px 8px;
+    font-size: 12px;
+    margin-top: 6px;
+}
+.ncrule b { color: var(--crimson); }
+
+.keys { margin-top: 6px; font-size: 12px; color: var(--muted); }
+.keys kbd {
+    font-family: inherit; font-size: 11px;
+    border: 1px solid var(--line); padding: 0 4px; color: var(--ink);
+}
+
+/* ── 영역 헤더 ────────────────── */
+.dom {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    background: var(--navy); color: #fff;
+    padding: 3px 8px;
+    font-size: 13px; font-weight: bold;
+}
+.dom + .dim { border-top: none; }
+.dim + .dom { margin-top: 4px; }
+.dom em { font-style: normal; font-weight: normal; font-size: 12px; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── 차원 행: 약어 | 차원명 ? | ①~⑦ | 근거 ── */
+.dim {
+    border-bottom: 1px solid var(--line);
+    border-left: 3px solid transparent;
+    padding: 3px 6px 3px 5px;
+}
+.dim-row {
+    display: grid;
+    grid-template-columns: 38px 126px auto minmax(120px, 1fr);
+    align-items: center;
+    column-gap: 8px;
+    min-height: 34px;
+}
+
+/* 현재 포커스된 차원 */
+.dim:focus-within { border-left-color: var(--navy); background: var(--navy-bg); }
+.dim.missing { outline: 2px solid var(--crimson); outline-offset: -2px; }
+
+.abbr {
+    border: 1px solid var(--navy);
+    font-size: 12px; font-weight: bold; color: var(--navy); text-align: center;
+    line-height: 20px;
+}
+.dim-name {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 14px; font-weight: bold; color: var(--navy); line-height: 1.2;
+}
+.raw-note { display: block; text-align: center; font-size: 11px; line-height: 1.3; margin-top: 1px; }
+
+.toggle {
+    flex: none;
+    width: 20px; height: 20px; line-height: 18px;
+    border: 1px solid var(--rule); border-radius: 50%;
+    background: #fff; color: var(--muted);
+    font-size: 12px; text-align: center;
+}
+.toggle[aria-expanded="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+.indicators {
+    font-size: 12px; color: var(--muted);
+    padding: 2px 0 3px 46px;
+}
+
+/* 1~7 원형 버튼 — 지름 32px */
+.scores { display: flex; gap: 3px; border-radius: 16px; }
+.scores button {
+    width: 32px; height: 32px; flex: none;
+    border: 1px solid var(--navy); border-radius: 50%;
+    background: #fff; color: var(--navy);
+    font-size: 14px; font-weight: bold;
+}
+.scores button[aria-checked="true"] { background: var(--navy); color: #fff; }
+.scores:focus-visible { outline-offset: 2px; }
+
+.evidence {
+    width: 100%; min-width: 0;
+    height: 30px; padding: 0 8px;
+    border: 1px solid var(--line); border-radius: 0;
+    background: #fff;
+    font-size: 13px;
+}
+.evidence::placeholder { color: #97a2ad; }
+
+/* NC — 크림슨 */
+.dim.rev { background: var(--crimson-bg); }
+.dim.rev:focus-within { border-left-color: var(--crimson); }
+.dim.rev .abbr { border-color: var(--crimson); color: var(--crimson); }
+.dim.rev .dim-name, .dim.rev .raw-note { color: var(--crimson); }
+.dim.rev .scores button { border-color: var(--crimson); color: var(--crimson); }
+.dim.rev .scores button[aria-checked="true"] { background: var(--crimson); color: #fff; }
+
+/* ── 메모·의견 ────────────────── */
+.memos { margin-top: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.memo { border: 1px solid var(--line); padding: 4px 8px 6px; }
+.memo label { display: block; }
+.memo b { color: var(--navy); font-size: 13px; }
+.memo em { font-style: normal; color: var(--muted); font-size: 11px; margin-left: 6px; }
+.memo textarea {
+    display: block; width: 100%; margin-top: 3px;
+    resize: vertical;
+    padding: 4px 6px; border: 1px solid var(--line); border-radius: 0;
+    font-size: 13px; line-height: 1.4;
+}
+
+.notice {
+    margin-top: 8px; padding: 6px 10px;
+    border-left: 3px solid var(--navy); background: var(--navy-bg);
+    font-size: 13px;
+}
+.notice.error { border-left-color: var(--crimson); background: var(--crimson-bg); }
+
+footer.legal {
+    margin: 10px 16px 0; border-top: 1px solid var(--line); padding: 4px 0 8px;
+    font-size: 11px; color: var(--muted);
+}
+
+/* ── 하단 고정 바: 영역 평균 3개 · 진행률 · 제출 ── */
+body.has-bar { padding-bottom: var(--bar-h); }
+.bar {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: #fff; border-top: 2px solid var(--gold);
+}
+.bar-inner {
+    height: var(--bar-h); padding: 6px 16px;
+    display: flex; align-items: center; gap: 8px;
+}
+.avg {
+    display: flex; align-items: baseline; gap: 6px;
+    border: 1px solid var(--line);
+    background: var(--gold-bg);
+    padding: 3px 10px;
+    font-size: 12px; color: var(--gold); font-weight: bold;
+    white-space: nowrap;
+}
+.avg b { font-size: 17px; color: var(--ink); min-width: 2.6em; }
+.avg small { font-size: 11px; font-weight: normal; color: var(--muted); }
+.avg .short { display: none; }
+.progress { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.progress b { color: var(--ink); font-size: 15px; }
+.submit {
+    height: 36px; padding: 0 22px;
+    border: none; background: var(--navy); color: #fff;
+    font-size: 15px; font-weight: bold;
+}
+.submit:disabled { opacity: 0.6; }
+
+/* ── 창을 좁히면 세로 1단. 영상은 상단 고정으로 남는다 ── */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .stage { display: contents; }
+    .video {
+        position: sticky; top: 0; z-index: 1;
+        width: 100%; max-height: 40vh;
+    }
+    .dim-row { grid-template-columns: 38px 1fr auto; row-gap: 3px; }
+    .dim-row .evidence { grid-column: 1 / -1; }
+    .memos { grid-template-columns: 1fr; }
+    .bar-inner { gap: 4px; padding: 6px 8px; }
+    .avg { padding: 3px 6px; }
+    .avg .full { display: none; } /* 좁을 때는 영역 약칭만 */
+    .avg .short { display: inline; }
+}
+
+/* ── 입장 화면 ────────────────── */
+.entry { max-width: 420px; margin: 0 auto; padding: 0 16px; }
+.entry .top { padding-left: 0; padding-right: 0; margin-top: 40px; }
+.entry footer.legal { margin: 32px 0 0; }
+.field { margin-top: 16px; }
+.field label { display: block; font-weight: bold; color: var(--navy); font-size: 14px; }
+.field input {
+    display: block; width: 100%; margin-top: 4px;
+    height: 44px; padding: 0 10px;
+    border: 1px solid var(--line); border-radius: 0;
+    font-size: 18px;
+}
+.field input#code { letter-spacing: 0.4em; font-weight: bold; }
+.field .check { margin-top: 4px; min-height: 1.4em; font-size: 13px; }
+.check.ok { color: var(--navy); font-weight: bold; }
+.check.bad { color: var(--crimson); }
+
+.primary {
+    display: block; width: 100%; margin-top: 20px;
+    height: 44px; border: none; background: var(--navy); color: #fff;
+    font-size: 16px; font-weight: bold;
+}
+.primary:disabled { background: var(--rule); }
