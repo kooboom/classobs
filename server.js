@@ -46,9 +46,13 @@ async function findSession(code) {
     return sessions.find((s) => s.code === code);
 }
 
-async function submittedCount(code) {
+// count: 제출한 사람 수(가상 포함), demoCount: 그중 가상 학생 수
+async function submissionCounts(code) {
     const list = await store.readJson(store.submissionsFile(code), []);
-    return list.filter((s) => s.status === 'submitted').length;
+    return {
+        count: list.filter((s) => s.status === 'submitted').length,
+        demoCount: list.filter((s) => s.demo).length,
+    };
 }
 
 // ---------- API ----------
@@ -91,7 +95,7 @@ api.get('/sessions', async (req, res, next) => {
         const sessions = await store.readJson(store.SESSIONS_FILE, []);
         const recent = [...sessions].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
         const withCount = await Promise.all(
-            recent.map(async (s) => ({ ...s, count: await submittedCount(s.code) }))
+            recent.map(async (s) => ({ ...s, ...(await submissionCounts(s.code)) }))
         );
         res.json(withCount);
     } catch (err) {
@@ -107,7 +111,7 @@ api.get('/sessions/:code', async (req, res, next) => {
         }
         const session = await findSession(code);
         if (!session) return res.status(404).json({ error: '없는 세션 코드입니다.' });
-        res.json({ ...session, count: await submittedCount(code) });
+        res.json({ ...session, ...(await submissionCounts(code)) });
     } catch (err) {
         next(err);
     }

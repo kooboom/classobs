@@ -505,17 +505,12 @@ body.has-bar { padding-bottom: var(--bar-h); }
 .card .memo-small { margin-top: 6px; font-size: 12px; color: var(--muted); }
 .card .memo-small b { color: var(--navy); font-weight: normal; margin-right: 4px; }
 
-.demo-tools { margin: 18px 0 4px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; }
-.demo-tools button {
-    height: 24px; padding: 0 8px;
-    border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 12px;
-}
 
 @media (max-width: 900px) {
     .cmp .stage, .cmp .work { display: contents; } /* 위의 .cmp .stage{display:flex} 보다 앞서야 한다 */
     /* 넓은 매트릭스가 한 단 칸을 밀어 넓히지 않게 — 넘치는 표는 표 안에서만 가로 스크롤 */
     .layout.cmp { grid-template-columns: minmax(0, 1fr); }
-    .cmp .player, .cmp .legend, .cmp .block, .cmp .demo-tools { min-width: 0; }
+    .cmp .player, .cmp .legend, .cmp .block { min-width: 0; }
     /* 한 단일 때는 SPEC 순서대로: 요약 → 점 그래프 → 레이더 → 매트릭스 → 근거 → 종합 의견 */
     .cmp .player { order: 0; }
     .cmp .legend { order: 1; margin-top: 8px; }
@@ -525,7 +520,6 @@ body.has-bar { padding-bottom: var(--bar-h); }
     .cmp #matrix { order: 5; }
     .cmp .evidence-panel { order: 6; overflow: visible; }
     .cmp #comments { order: 7; }
-    .cmp .demo-tools { order: 8; }
     .radar-wrap { grid-template-columns: minmax(0, 1fr) 150px; }
     .cmp .block { margin-top: 0; }
     .tiles { grid-template-columns: 1fr 1fr; }
@@ -560,6 +554,17 @@ body.has-bar { padding-bottom: var(--bar-h); }
 .session-list td:nth-child(2) { white-space: normal; }
 .session-list .code-cell { font-weight: bold; color: var(--navy); font-size: 15px; letter-spacing: 0.08em; }
 .session-list .links a { color: var(--navy); }
+.session-list .count-cell { white-space: normal; }
+.session-list .count-cell .demo-badge { margin-left: 0; }
+.session-list .demo-cell { white-space: normal; }
+.small-btn {
+    height: 24px; padding: 0 8px; margin: 1px 0;
+    border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 12px;
+}
+.small-btn:hover { border-color: var(--rule); color: var(--ink); }
+.small-btn:disabled { opacity: 0.5; cursor: default; }
+.list-msg { min-height: 1.5em; margin-top: 6px; font-size: 13px; color: var(--navy); }
+.list-msg.bad { color: var(--crimson); }
 .newpage footer.legal { margin: 24px 0 0; }
 
 /* ════════════════ 인쇄 — 비교 화면을 A4 토론 기록지로 ════════════════
@@ -576,8 +581,8 @@ body.has-bar { padding-bottom: var(--bar-h); }
     .print-only { display: block; }
     #printed-at { display: inline; margin-left: 8px; }
 
-    /* 숨길 것: 영상, 화면용 근거 칸, 버튼류, 툴팁, 갱신 시각, 채점 화면 링크 */
-    .player, .cmp .evidence-panel, .demo-tools, .tip, #updated, #back, .rd-all { display: none !important; }
+    /* 숨길 것: 영상, 화면용 근거 칸, 툴팁, 갱신 시각, 채점 화면 링크, 레이더 강조 해제 버튼 */
+    .player, .cmp .evidence-panel, .tip, #updated, #back, .rd-all { display: none !important; }
 
     .top { padding: 0 0 3px; }
     .top h1 { font-size: 14pt; }

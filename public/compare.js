@@ -513,26 +513,3 @@ if (NAME) {
         loadSubmissions();
     }, POLL_MS);
 })();
-
-// ---------- 데모 ----------
-
-async function demo(method) {
-    const state = $('demo-state');
-    state.textContent = '처리 중…';
-    try {
-        const duration = Video.duration();
-        const res = await fetch(`api/sessions/${CODE}/demo`, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: method === 'POST' ? JSON.stringify({ maxSeconds: duration || undefined }) : undefined,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || res.status);
-        state.textContent = method === 'POST' ? `가상 학생 ${data.created.length}명을 만들었습니다.` : `가상 학생 ${data.removed}명을 지웠습니다.`;
-        await loadSubmissions();
-    } catch (err) {
-        state.textContent = `실패: ${err.message}`;
-    }
-}
-$('demo-add').addEventListener('click', () => demo('POST'));
-$('demo-clear').addEventListener('click', () => demo('DELETE'));
