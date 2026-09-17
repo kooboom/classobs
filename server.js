@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const path = require('path');
 const store = require('./store');
 const { DIMENSIONS } = require('./public/dimensions');
+const { generateDemo } = require('./demo');
 
 const PORT = process.env.PORT || 3003; // 3002는 class-quiz가 쓴다
 const BASE = '/classobs';
@@ -135,8 +136,10 @@ api.post('/sessions/:code/submissions', async (req, res, next) => {
         let saved;
         await store.update(store.submissionsFile(code), [], (list) => {
             const i = list.findIndex((s) => s.name === name);
-            // 한 번 제출한 사람의 이후 자동 임시저장이 '제출'을 '임시'로 되돌리지 않게 한다
-            const status = i >= 0 && list[i].status === 'submitted' ? 'submitted' : body.status;
+            // 한 번 제출한 사람의 이후 자동 임시저장이 '제출'을 '임시'로 되돌리지 않게 한다.
+            // 가상 학생과 이름이 같은 실제 학생이 들어오면 가상 기록의 '제출' 상태를 물려받지 않는다
+            const wasSubmitted = i >= 0 && !list[i].demo && list[i].status === 'submitted';
+            const status = wasSubmitted ? 'submitted' : body.status;
             saved = {
                 name,
                 status,
@@ -166,6 +169,59 @@ api.get('/sessions/:code/submissions', async (req, res, next) => {
             return res.status(404).json({ error: '없는 세션 코드입니다.' });
         }
         res.json(await store.readJson(store.submissionsFile(code), []));
+    } catch (err) {
+        next(err);
+    }
+});
+
+// ---------- 데모 데이터 (가상 학생) ----------
+// 가상 기록은 demo: true 로 표시한다. 실제 학생 기록은 절대 덮어쓰거나 지우지 않는다.
+
+async function checkSession(req, res) {
+    const { code } = req.params;
+    if (!store.isValidCode(code)) {
+        res.status(400).json({ error: '세션 코드는 숫자 4자리입니다.' });
+        return null;
+    }
+    if (!(await findSession(code))) {
+        res.status(404).json({ error: '없는 세션 코드입니다.' });
+        return null;
+    }
+    return code;
+}
+
+// 다시 누르면 기존 가상 학생을 지우고 새로 5명을 만든다
+api.post('/sessions/:code/demo', async (req, res, next) => {
+    try {
+        const code = await checkSession(req, res);
+        if (!code) return;
+        // 영상 길이를 알면 타임스탬프가 그 안에 들어가게 한다 (기본 10분)
+        const seconds = Number(req.body?.maxSeconds);
+        const maxSeconds = Number.isFinite(seconds) && seconds >= 60 ? Math.min(seconds, 6 * 3600) : 600;
+
+        let created;
+        await store.update(store.submissionsFile(code), [], (list) => {
+            const real = list.filter((s) => !s.demo);
+            created = generateDemo({ exclude: real.map((s) => s.name), maxSeconds });
+            return [...real, ...created];
+        });
+        res.status(201).json({ created: created.map((s) => s.name) });
+    } catch (err) {
+        next(err);
+    }
+});
+
+api.delete('/sessions/:code/demo', async (req, res, next) => {
+    try {
+        const code = await checkSession(req, res);
+        if (!code) return;
+        let removed = 0;
+        await store.update(store.submissionsFile(code), [], (list) => {
+            const real = list.filter((s) => !s.demo);
+            removed = list.length - real.length;
+            return real;
+        });
+        res.json({ removed });
     } catch (err) {
         next(err);
     }
