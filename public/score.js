@@ -308,35 +308,6 @@ document.addEventListener('keydown', (e) => {
 
 // ---------- 영상 ----------
 
-const player = {
-    msg: $('video-msg'), back: $('back10'), mute: $('mute'), clock: $('clock'),
-    mount: $('player-mount'), started: false,
-};
-
-function startVideo(url) {
-    if (player.started || !url) return;
-    player.started = true;
-    Video.init(player.mount, url);
-}
-
-function videoMessage(text, isError) {
-    player.msg.textContent = text || '';
-    player.msg.classList.toggle('error', Boolean(isError));
-    player.msg.hidden = !text;
-}
-
-function setVideoControls(enabled) {
-    player.back.disabled = !enabled;
-    player.mute.disabled = !enabled;
-    for (const row of Object.values(rows)) row.stamp.disabled = !enabled;
-}
-
-function paintMute() {
-    const muted = Video.isMuted();
-    player.mute.textContent = muted ? '🔇 소리 켜기' : '🔊 소리 끄기';
-    player.mute.setAttribute('aria-pressed', String(muted));
-}
-
 // 영상 조작 뒤에는 채점 중이던 차원으로 포커스를 돌려 숫자키가 바로 먹게 한다
 function refocusScoring() {
     const active = document.activeElement;
@@ -345,30 +316,13 @@ function refocusScoring() {
     }
 }
 
-Video.on((type, detail) => {
-    if (type === 'ready') {
-        videoMessage('');
-        setVideoControls(true);
-        paintMute();
-    } else if (type === 'error') {
-        videoMessage(detail.message, true);
-        setVideoControls(false);
-        player.clock.textContent = '--:--';
-    } else if (type === 'state') {
-        // 영상을 클릭해 재생·정지하면 포커스가 iframe 으로 넘어간다
-        setTimeout(refocusScoring, 0);
-    }
+const playerUI = bindPlayerUI({
+    onEnabled(enabled) {
+        for (const row of Object.values(rows)) row.stamp.disabled = !enabled;
+    },
+    onState: refocusScoring, // 영상을 클릭해 재생·정지하면 포커스가 iframe 으로 넘어간다
+    afterControl: refocusScoring,
 });
-
-player.back.addEventListener('click', () => { Video.back(10); refocusScoring(); });
-player.mute.addEventListener('click', () => { Video.toggleMute(); paintMute(); refocusScoring(); });
-
-setInterval(() => {
-    if (!Video.ready) return;
-    const now = Video.format(Video.currentTime());
-    const total = Video.duration();
-    player.clock.innerHTML = total ? `${now} <small>/ ${Video.format(total)}</small>` : now;
-}, 500);
 
 // 근거 앞에 "[03:41] " 을 넣고 커서를 그 뒤에 둔다. 타임스탬프만 있는 칸이면 새 위치로 바꾼다
 function stamp(key) {
@@ -426,7 +380,8 @@ el.submit.addEventListener('click', async () => {
         saveLocal();
         paintBar();
         el.savestate.textContent = `제출됨 ${timeText()}`;
-        notice('제출했습니다. 고친 뒤 다시 제출하면 덮어씁니다.');
+        notice('제출했습니다. 비교 화면으로 이동합니다…');
+        location.href = `compare.html?code=${CODE}&name=${encodeURIComponent(NAME)}`;
     } catch (err) {
         dirty = true;
         notice(err.status
@@ -447,7 +402,7 @@ const firstEmpty = DIMENSIONS.find((d) => !state.scores[d.key]?.s) || DIMENSIONS
 rows[firstEmpty.key].group.focus({ preventScroll: true });
 lastKey = firstEmpty.key;
 
-if (cachedSession?.videoUrl) startVideo(cachedSession.videoUrl);
+if (cachedSession?.videoUrl) playerUI.start(cachedSession.videoUrl);
 
 (async function loadFromServer() {
     try {
@@ -460,11 +415,11 @@ if (cachedSession?.videoUrl) startVideo(cachedSession.videoUrl);
             const session = await res.json();
             LS.set(KEYS.session(CODE), session);
             setTitle(session.title);
-            startVideo(session.videoUrl);
+            playerUI.start(session.videoUrl);
         }
     } catch {
         el.savestate.textContent = '서버 연결 안 됨 — 이 기기에 보관 중';
-        if (!cachedSession) videoMessage('서버에 연결할 수 없어 영상 주소를 모릅니다. 프로젝터 화면을 보세요.', true);
+        if (!cachedSession) playerUI.message('서버에 연결할 수 없어 영상 주소를 모릅니다. 프로젝터 화면을 보세요.', true);
     }
 
     // 이 기기에 임시 저장본이 없으면, 다른 기기에서 쓰던 기록을 서버에서 불러온다

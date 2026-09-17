@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLASS 비교</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+    <h1><span id="title">CLASS 관찰 비교</span><small id="subtitle"></small></h1>
+    <div class="who">
+        <b id="counts">불러오는 중…</b><span id="updated" aria-live="polite"></span>
+        <a id="back" class="toplink" hidden>채점 화면으로</a>
+    </div>
+</header>
+
+<div class="layout cmp">
+    <aside class="stage">
+        <div class="player">
+            <div class="video">
+                <div id="player-mount"></div>
+                <div id="video-msg" class="video-msg">영상 불러오는 중…</div>
+            </div>
+            <div class="video-bar">
+                <button id="back10" type="button" disabled>⟲ 10초 뒤로</button>
+                <button id="mute" type="button" disabled aria-pressed="true">🔇 소리 켜기</button>
+                <span id="clock" class="clock">--:--</span>
+            </div>
+        </div>
+
+        <!-- (5) 근거 나란히 보기 — 화면에서는 영상 아래 고정, 좁은 창·인쇄에서는 제 순서로 -->
+        <section id="evidence" class="block evidence-panel" aria-labelledby="ev-title">
+            <p class="prompt">점수가 갈렸다면, 서로 <b>다른 장면을 근거로 삼은 것</b>인지 <b>같은 장면을 다르게 해석한 것</b>인지 먼저 확인하십시오.</p>
+            <h2 id="ev-title">근거 나란히 보기</h2>
+            <div id="ev-body" class="ev-body"><p class="empty">차원을 누르면 근거가 점수 낮은 순으로 나옵니다.</p></div>
+        </section>
+    </aside>
+
+    <main class="work">
+        <div id="legend" class="legend" aria-label="사람 번호"></div>
+
+        <!-- (1) 요약 배지 -->
+        <section id="summary" class="block" aria-labelledby="sum-title">
+            <h2 id="sum-title">요약</h2>
+            <div id="sum-body" class="tiles"></div>
+        </section>
+
+        <!-- (2) 차원별 점 그래프 -->
+        <section id="dots" class="block" aria-labelledby="dots-title">
+            <h2 id="dots-title">차원별 점수 분포 <small>불일치 폭이 큰 차원부터 · 점에 마우스를 올리면 이름 · 줄을 누르면 근거</small></h2>
+            <div id="dots-body"></div>
+        </section>
+
+        <!-- (3) 레이더 차트 — 6단계 -->
+
+        <!-- (4) 점수 매트릭스 -->
+        <section id="matrix" class="block" aria-labelledby="mx-title">
+            <h2 id="mx-title">점수 매트릭스 <small>행을 누르면 근거</small></h2>
+            <div class="bands">
+                <span class="band low">1–2 낮음</span><span class="band mid">3–5 중간</span><span class="band high">6–7 높음</span>
+                <span class="muted">NC는 원점수 (역산값)</span>
+            </div>
+            <div class="scroll-x"><table id="mx-body" class="mx"></table></div>
+        </section>
+
+        <!-- (6) 종합 의견 카드 -->
+        <section id="comments" class="block" aria-labelledby="cm-title">
+            <h2 id="cm-title">종합 의견</h2>
+            <div id="cm-body" class="cards"></div>
+        </section>
+
+        <div class="demo-tools">
+            <button id="demo-add" type="button">가상 학생 5명으로 데모</button>
+            <button id="demo-clear" type="button">가상 데이터 지우기</button>
+            <span id="demo-state" class="muted"></span>
+        </div>
+    </main>
+</div>
+
+<footer class="legal">
+    공개된 CLASS 연구 논문을 바탕으로 교육 목적으로 재구성한 실습 도구이며, 공식 Teachstone 인증 도구가 아닙니다. 저작권은 Teachstone Training, LLC에 있습니다.
+</footer>
+
+<div id="tip" class="tip" role="tooltip" hidden></div>
+
+<script src="dimensions.js"></script>
+<script src="scoring.js"></script>
+<script src="storage.js"></script>
+<script src="video.js"></script>
+<script src="player-ui.js"></script>
+<script src="compare-stats.js"></script>
+<script src="compare.js"></script>
+</body>
+</html>

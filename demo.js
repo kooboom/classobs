@@ -21,7 +21,11 @@ const PARAMS = {
     LM: { mean: 2.8, sd: 0.9 },
 };
 
-// 관찰자 편향(관대/엄격): 학생마다 하나의 고정값을 전 차원에 더한다
+// 관찰자 편향: "이 관찰자가 교사를 얼마나 후하게 보는가". 학생마다 하나의 고정값.
+// 후한 사람은 좋은 장면을 더 잘 보고 나쁜 장면은 덜 심각하게 본다.
+// 그래서 아홉 차원에는 더하고, 원점수가 클수록 나쁜 NC(reverse)에는 뺀다.
+// (SPEC 8절의 "전 차원에 더한다"는 부정확한 문구다. NC에도 더하면 편향이
+//  정서적 지원 평균 안에서 상쇄되어 불일치를 만드는 목적이 절반 사라진다.)
 const BIAS_RANGE = 0.6;
 
 // 교수적 지원(CD·QF·LM)은 관찰자들이 가장 많이 갈리는 영역이다.
@@ -138,11 +142,12 @@ function biases(count, random) {
     return shuffle(values, random);
 }
 
-// 원점수 하나: 정규분포에서 뽑고 → 편향을 더하고 → 1~7로 자르고 → 정수 반올림
+// 원점수 하나: 정규분포에서 뽑고 → 편향을 더하고(NC는 빼고) → 1~7로 자르고 → 정수 반올림
 function drawScore(dim, bias, random) {
     const { mean, sd } = PARAMS[dim.key];
     const spread = dim.domain === IS_DOMAIN ? sd * Math.sqrt(IS_VARIANCE_FACTOR) : sd;
-    const x = mean + spread * normal(random) + bias;
+    const lenience = dim.reverse ? -bias : bias;
+    const x = mean + spread * normal(random) + lenience;
     return Math.round(Math.min(7, Math.max(1, x)));
 }
 

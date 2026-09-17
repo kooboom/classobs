@@ -141,6 +141,9 @@ const Video = (() => {
             if (!ready) return;
             player.seekTo(Math.max(0, seconds), true);
         },
+        play() {
+            if (ready) player.playVideo();
+        },
         back(seconds = 10) {
             if (!ready) return;
             player.seekTo(Math.max(0, player.getCurrentTime() - seconds), true);

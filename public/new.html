@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>세션 만들기 · CLASS 관찰 실습</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="newpage">
+    <div class="top">
+        <h1>세션 만들기<small>CLASS 관찰 실습 · 회차마다 하나</small></h1>
+    </div>
+
+    <form id="form" class="new-form" novalidate>
+        <div class="field">
+            <label for="title">제목</label>
+            <input id="title" maxlength="100" placeholder="2026-2학기 4주차" autocomplete="off">
+        </div>
+        <div class="field">
+            <label for="url">유튜브 주소</label>
+            <input id="url" type="url" maxlength="500" placeholder="https://www.youtube.com/watch?v=…" autocomplete="off">
+        </div>
+        <button id="create" class="primary" type="submit">세션 만들기</button>
+        <p id="form-msg" class="check bad" aria-live="polite"></p>
+    </form>
+
+    <section id="result" class="new-result" hidden aria-live="polite">
+        <div class="result-label">세션 코드 — 칠판에 적어 주세요</div>
+        <div id="result-code" class="result-code"></div>
+        <div id="result-title" class="result-title"></div>
+        <div class="result-url">학생 주소 <b id="result-url"></b></div>
+        <div class="result-links">
+            <a id="result-compare" class="toplink">비교 화면 열기</a>
+        </div>
+    </section>
+
+    <section class="sessions">
+        <h2>기존 세션 <small>최근 순</small></h2>
+        <div class="scroll-x">
+            <table class="session-list">
+                <thead><tr><th>코드</th><th>제목</th><th>만든 날</th><th>제출</th><th></th></tr></thead>
+                <tbody id="list"><tr><td colspan="5" class="empty">불러오는 중…</td></tr></tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer class="legal">
+        공개된 CLASS 연구 논문을 바탕으로 교육 목적으로 재구성한 실습 도구이며, 공식 Teachstone 인증 도구가 아닙니다. 저작권은 Teachstone Training, LLC에 있습니다.
+    </footer>
+</main>
+
+<script src="video.js"></script>
+<script src="new.js"></script>
+</body>
+</html>

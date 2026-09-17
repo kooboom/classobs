@@ -246,6 +246,12 @@ const app = express();
 const router = express.Router();
 
 router.use('/api', api);
+
+// 세션 만들기 화면. 끝 슬래시가 붙으면 상대 경로(style.css 등)가 어긋나므로 떼어 준다
+router.get('/new', (req, res) => {
+    if (req.originalUrl.split('?')[0].endsWith('/')) return res.redirect(301, `${BASE}/new`);
+    res.sendFile(path.join(__dirname, 'public', 'new.html'));
+});
 router.use(express.static(path.join(__dirname, 'public')));
 
 // /classobs → /classobs/ (상대 경로가 맞게 풀리도록). Express 라우팅은 끝 슬래시를 구분하지 않아서
