@@ -129,13 +129,8 @@ api.post('/sessions/:code/submissions', async (req, res, next) => {
             return res.status(400).json({ error: 'status는 draft 또는 submitted입니다.' });
         }
 
+        // 점수가 빈 차원이 있어도 받는다. 한 차원에서 막힌 학생이 토론에서 빠지는 것이 더 나쁘다
         const scores = cleanScores(body.scores);
-        if (body.status === 'submitted') {
-            const missing = DIMENSIONS.filter((d) => !scores[d.key]?.s).map((d) => d.key);
-            if (missing.length) {
-                return res.status(400).json({ error: `점수가 비어 있습니다: ${missing.join(', ')}`, missing });
-            }
-        }
 
         let saved;
         await store.update(store.submissionsFile(code), [], (list) => {

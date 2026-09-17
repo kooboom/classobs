@@ -1,7 +1,8 @@
 // 채점 화면
 // - 점수는 원점수로 입력·저장한다. 역산은 scoring.js 의 영역 평균에서만.
 // - 입력이 멈추고 2초 뒤 서버에 draft 저장, localStorage 에는 즉시 복사.
-// - 키보드: 차원마다 점수 묶음이 Tab 한 칸. 1~7 점수, ←→ 한 칸씩, ↓↑ 다음·이전 차원.
+// - 키보드: 차원마다 점수 묶음이 Tab 한 칸. 1~7 점수, ←→ 한 칸씩, ↓↑ 다음·이전 차원,
+//   T 현재 재생 위치를 근거 앞에 넣고 근거 칸으로.
 
 const params = new URLSearchParams(location.search);
 const CODE = params.get('code') || '';
@@ -98,7 +99,10 @@ function renderDim(dim) {
                 </div>
                 ${dim.reverse ? '<small class="raw-note">원점수 — 부정성이 클수록 높은 점수</small>' : ''}
             </div>
-            <input class="evidence" type="text" maxlength="200" placeholder="근거: ${dim.hint}" aria-label="${dim.key} 근거">
+            <div class="ev-cell">
+                <input class="evidence" type="text" maxlength="200" placeholder="근거: ${dim.hint}" aria-label="${dim.key} 근거">
+                <button type="button" class="stamp" tabindex="-1" disabled title="현재 재생 위치를 근거 앞에 넣기 (T)" aria-label="${dim.key} 근거에 재생 위치 넣기">⏱</button>
+            </div>
         </div>
         <div class="indicators" id="${indId}" hidden>${dim.indicators.join(' · ')}</div>
     `;
@@ -108,6 +112,7 @@ function renderDim(dim) {
         group: root.querySelector('.scores'),
         buttons: [...root.querySelectorAll('.scores button')],
         evidence: root.querySelector('.evidence'),
+        stamp: root.querySelector('.stamp'),
     };
     rows[dim.key] = row;
 
@@ -126,6 +131,8 @@ function renderDim(dim) {
         row.group.focus(); // Safari 는 클릭한 버튼에 포커스를 주지 않는다
     });
 
+    row.stamp.addEventListener('click', () => stamp(dim.key));
+
     row.group.addEventListener('keydown', (e) => {
         if (e.altKey || e.ctrlKey || e.metaKey) return;
         const current = state.scores[dim.key]?.s || 0;
@@ -139,6 +146,8 @@ function renderDim(dim) {
             moveTo(dim.key, +1);
         } else if (e.key === 'ArrowUp') {
             moveTo(dim.key, -1);
+        } else if (e.code === 'KeyT' && !e.shiftKey) { // 한글 입력 상태에서도 e.code 는 KeyT
+            stamp(dim.key);
         } else {
             return;
         }
@@ -291,31 +300,118 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         rows[lastKey].group.focus();
         setScore(lastKey, Number(e.key));
+    } else if (e.code === 'KeyT' && !e.shiftKey) {
+        e.preventDefault();
+        stamp(lastKey);
     }
 });
+
+// ---------- 영상 ----------
+
+const player = {
+    msg: $('video-msg'), back: $('back10'), mute: $('mute'), clock: $('clock'),
+    mount: $('player-mount'), started: false,
+};
+
+function startVideo(url) {
+    if (player.started || !url) return;
+    player.started = true;
+    Video.init(player.mount, url);
+}
+
+function videoMessage(text, isError) {
+    player.msg.textContent = text || '';
+    player.msg.classList.toggle('error', Boolean(isError));
+    player.msg.hidden = !text;
+}
+
+function setVideoControls(enabled) {
+    player.back.disabled = !enabled;
+    player.mute.disabled = !enabled;
+    for (const row of Object.values(rows)) row.stamp.disabled = !enabled;
+}
+
+function paintMute() {
+    const muted = Video.isMuted();
+    player.mute.textContent = muted ? '🔇 소리 켜기' : '🔊 소리 끄기';
+    player.mute.setAttribute('aria-pressed', String(muted));
+}
+
+// 영상 조작 뒤에는 채점 중이던 차원으로 포커스를 돌려 숫자키가 바로 먹게 한다
+function refocusScoring() {
+    const active = document.activeElement;
+    if (!active || active === document.body || active.tagName === 'IFRAME' || active.closest?.('.video-bar')) {
+        rows[lastKey].group.focus({ preventScroll: true });
+    }
+}
+
+Video.on((type, detail) => {
+    if (type === 'ready') {
+        videoMessage('');
+        setVideoControls(true);
+        paintMute();
+    } else if (type === 'error') {
+        videoMessage(detail.message, true);
+        setVideoControls(false);
+        player.clock.textContent = '--:--';
+    } else if (type === 'state') {
+        // 영상을 클릭해 재생·정지하면 포커스가 iframe 으로 넘어간다
+        setTimeout(refocusScoring, 0);
+    }
+});
+
+player.back.addEventListener('click', () => { Video.back(10); refocusScoring(); });
+player.mute.addEventListener('click', () => { Video.toggleMute(); paintMute(); refocusScoring(); });
+
+setInterval(() => {
+    if (!Video.ready) return;
+    const now = Video.format(Video.currentTime());
+    const total = Video.duration();
+    player.clock.innerHTML = total ? `${now} <small>/ ${Video.format(total)}</small>` : now;
+}, 500);
+
+// 근거 앞에 "[03:41] " 을 넣고 커서를 그 뒤에 둔다. 타임스탬프만 있는 칸이면 새 위치로 바꾼다
+function stamp(key) {
+    const t = Video.currentTime();
+    if (t === null) return;
+    const input = rows[key].evidence;
+    const tag = `[${Video.format(t)}] `;
+    const rest = /^\[[\d:]+\]\s*$/.test(input.value) ? '' : input.value;
+    input.value = (tag + rest).slice(0, 200);
+    entry(key).ev = input.value;
+    changed();
+    input.focus();
+    input.setSelectionRange(tag.length, tag.length);
+}
 
 // ---------- 제출 ----------
 
 el.submit.addEventListener('click', async () => {
+    // 빈 점수·빈 근거는 경고만 하고 막지 않는다.
+    // 한 차원에서 막힌 학생이 토론에서 아예 빠지는 것이 더 나쁘다.
     const missing = DIMENSIONS.filter((d) => !state.scores[d.key]?.s);
-    if (missing.length) {
-        for (const d of missing) rows[d.key].root.classList.add('missing');
-        notice(`점수가 비어 있는 차원이 있습니다: ${missing.map((d) => d.key).join(', ')}`, 'error');
-        rows[missing[0].key].group.focus();
-        rows[missing[0].key].root.scrollIntoView({ block: 'nearest' });
-        return;
-    }
+    const noEvidence = DIMENSIONS.filter((d) => state.scores[d.key]?.s && !state.scores[d.key]?.ev?.trim());
+    for (const d of DIMENSIONS) rows[d.key].root.classList.toggle('missing', missing.includes(d));
 
-    const noEvidence = DIMENSIONS.filter((d) => !state.scores[d.key]?.ev?.trim());
-    if (noEvidence.length) {
-        const ok = confirm(
-            `근거가 비어 있는 차원이 ${noEvidence.length}개 있습니다: ${noEvidence.map((d) => d.key).join(', ')}\n\n`
-            + '근거 없이 점수만 모이면 비교 화면에서 "왜 그 점수인지" 토론할 수 없습니다.\n'
-            + '어떤 장면을 보고 매겼는지 한 줄이라도 적는 것을 권합니다.\n\n'
-            + '그래도 지금 제출할까요?'
-        );
-        if (!ok) {
-            rows[noEvidence[0].key].evidence.focus();
+    if (missing.length || noEvidence.length) {
+        const lines = [];
+        if (missing.length) {
+            lines.push(`점수가 비어 있는 차원 ${missing.length}개: ${missing.map((d) => d.key).join(', ')}`,
+                '→ 이 차원은 비교 화면에서 빠집니다.', '');
+        }
+        if (noEvidence.length) {
+            lines.push(`근거가 비어 있는 차원 ${noEvidence.length}개: ${noEvidence.map((d) => d.key).join(', ')}`,
+                '→ 근거 없이 점수만 모이면 "왜 그 점수인지" 토론할 수 없습니다.',
+                '   어떤 장면을 보고 매겼는지 한 줄이라도 적는 것을 권합니다.', '');
+        }
+        lines.push('그래도 지금 제출할까요? (제출한 뒤에도 고쳐서 다시 낼 수 있습니다)');
+        if (!confirm(lines.join('\n'))) {
+            if (missing.length) {
+                rows[missing[0].key].group.focus();
+                rows[missing[0].key].root.scrollIntoView({ block: 'nearest' });
+            } else {
+                rows[noEvidence[0].key].evidence.focus();
+            }
             return;
         }
     }
@@ -349,6 +445,9 @@ paintAll();
 // 첫 번째 빈 차원에 포커스 — 바로 숫자키로 채점할 수 있게
 const firstEmpty = DIMENSIONS.find((d) => !state.scores[d.key]?.s) || DIMENSIONS[0];
 rows[firstEmpty.key].group.focus({ preventScroll: true });
+lastKey = firstEmpty.key;
+
+if (cachedSession?.videoUrl) startVideo(cachedSession.videoUrl);
 
 (async function loadFromServer() {
     try {
@@ -361,9 +460,11 @@ rows[firstEmpty.key].group.focus({ preventScroll: true });
             const session = await res.json();
             LS.set(KEYS.session(CODE), session);
             setTitle(session.title);
+            startVideo(session.videoUrl);
         }
     } catch {
         el.savestate.textContent = '서버 연결 안 됨 — 이 기기에 보관 중';
+        if (!cachedSession) videoMessage('서버에 연결할 수 없어 영상 주소를 모릅니다. 프로젝터 화면을 보세요.', true);
     }
 
     // 이 기기에 임시 저장본이 없으면, 다른 기기에서 쓰던 기록을 서버에서 불러온다

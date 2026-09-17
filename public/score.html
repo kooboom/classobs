@@ -14,7 +14,17 @@
 
 <div class="layout">
     <aside class="stage">
-        <div class="video" id="video">영상 자리 (3단계에서 연결)</div>
+        <div class="player">
+            <div class="video">
+                <div id="player-mount"></div>
+                <div id="video-msg" class="video-msg">영상 불러오는 중…</div>
+            </div>
+            <div class="video-bar">
+                <button id="back10" type="button" disabled>⟲ 10초 뒤로</button>
+                <button id="mute" type="button" disabled aria-pressed="true">🔇 소리 켜기</button>
+                <span id="clock" class="clock">--:--</span>
+            </div>
+        </div>
 
         <div class="scale">
             <div><b>낮음 1–2</b>드물거나 짧고 표면적인 수준</div>
@@ -29,7 +39,7 @@
         </div>
 
         <p class="keys">
-            <kbd>1</kbd>–<kbd>7</kbd> 점수 · <kbd>↓</kbd><kbd>↑</kbd> 다음·이전 차원 · <kbd>Tab</kbd> 근거 칸으로
+            <kbd>1</kbd>–<kbd>7</kbd> 점수 · <kbd>↓</kbd><kbd>↑</kbd> 다음·이전 차원 · <kbd>Tab</kbd> 근거 칸으로 · <kbd>T</kbd> 재생 위치를 근거에 넣기
         </p>
     </aside>
 
@@ -66,6 +76,7 @@
 <script src="dimensions.js"></script>
 <script src="scoring.js"></script>
 <script src="storage.js"></script>
+<script src="video.js"></script>
 <script src="score.js"></script>
 </body>
 </html>
