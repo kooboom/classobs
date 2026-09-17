@@ -52,7 +52,18 @@
             <div id="dots-body"></div>
         </section>
 
-        <!-- (3) 레이더 차트 — 6단계 -->
+        <!-- (3) 레이더 차트 — 반드시 10차원. NC는 역산값 -->
+        <section id="radar" class="block" aria-labelledby="rd-title">
+            <h2 id="rd-title">레이더 <small>10개 차원 · 이름을 누르면 그 사람만 강조 · 꼭짓점을 누르면 근거</small></h2>
+            <div class="radar-wrap">
+                <div id="rd-chart" class="radar-chart"></div>
+                <div id="rd-legend" class="radar-legend" aria-label="사람 강조"></div>
+            </div>
+            <p class="radar-note">
+                바깥쪽일수록 높은 점수입니다. <b class="rev-text">NC(역산)</b>은 8 − 원점수로 그려 부정성이 적을수록 바깥쪽에 옵니다.
+                빈 점수는 그 꼭짓점에서 선을 끊어 표시합니다(0점이나 추정값으로 잇지 않음).
+            </p>
+        </section>
 
         <!-- (4) 점수 매트릭스 -->
         <section id="matrix" class="block" aria-labelledby="mx-title">

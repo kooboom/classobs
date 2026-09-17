@@ -52,6 +52,7 @@ let list = [];
 let people = [];
 let stats = [];
 let selectedKey = null;
+let focusSlot = null; // 레이더에서 강조한 사람 (slot). null 이면 모두 같게
 let lastJson = '';
 
 // ---------- 그리기 ----------
@@ -70,6 +71,7 @@ function renderAll() {
     renderLegend();
     renderSummary();
     renderDots();
+    renderRadar();
     renderMatrix();
     renderEvidence();
     renderComments();
@@ -181,6 +183,105 @@ function renderDots() {
         </div>`).join('');
 }
 
+// ---------- (3) 레이더 ----------
+// 꼭짓점 10개, 사람마다 선 하나. 1~7점을 중심에서 바깥으로(1점도 중심에 뭉치지 않게 v/7 비율).
+// 빈 점수는 radarRuns 로 선을 끊는다.
+const RADAR = { W: 560, H: 470, cx: 280, cy: 232, R: 168 };
+
+function radarPoint(i, v) {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / DIMENSIONS.length;
+    const r = (v / 7) * RADAR.R;
+    return [RADAR.cx + r * Math.cos(angle), RADAR.cy + r * Math.sin(angle)];
+}
+const pt = ([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`;
+
+function renderRadar() {
+    const chart = $('rd-chart');
+    const legend = $('rd-legend');
+    if (!people.length) {
+        chart.innerHTML = '<p class="empty">제출이 들어오면 그려집니다.</p>';
+        legend.innerHTML = '';
+        return;
+    }
+    if (focusSlot !== null && !people.some((p) => p.slot === focusSlot)) focusSlot = null;
+
+    const n = DIMENSIONS.length;
+    const parts = [];
+
+    // 눈금 고리 1~7 (7은 조금 진하게) + 바퀴살
+    for (let v = 1; v <= 7; v++) {
+        const ring = DIMENSIONS.map((_, i) => pt(radarPoint(i, v))).join(' ');
+        parts.push(`<polygon class="ring${v === 7 ? ' outer' : ''}" points="${ring}"/>`);
+    }
+    for (const v of [1, 3, 5, 7]) {
+        const [x, y] = radarPoint(0, v);
+        parts.push(`<text class="ring-label" x="${x + 4}" y="${y + 4}">${v}</text>`);
+    }
+    DIMENSIONS.forEach((dim, i) => {
+        const [x, y] = radarPoint(i, 7);
+        parts.push(`<line class="spoke${dim.key === selectedKey ? ' sel' : ''}" x1="${RADAR.cx}" y1="${RADAR.cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`);
+    });
+
+    // 축 이름 — 누르면 그 차원의 근거
+    DIMENSIONS.forEach((dim, i) => {
+        const [x, y] = radarPoint(i, 7.95);
+        const dx = x - RADAR.cx;
+        const anchor = Math.abs(dx) < 8 ? 'middle' : dx > 0 ? 'start' : 'end';
+        const label = dim.reverse ? 'NC(역산)' : dim.key;
+        const cls = `axis-label${dim.reverse ? ' rev' : ''}${dim.key === selectedKey ? ' sel' : ''}`;
+        const yTop = y < RADAR.cy - RADAR.R * 0.9 ? y - 14 : y > RADAR.cy + RADAR.R * 0.9 ? y + 4 : y - 5;
+        parts.push(`<g class="${cls}" data-select="${dim.key}" role="button" tabindex="0" aria-label="${esc(dim.name)} 근거 보기">
+            <text x="${x.toFixed(1)}" y="${yTop.toFixed(1)}" text-anchor="${anchor}"><tspan class="ab">${label}</tspan><tspan class="nm" x="${x.toFixed(1)}" dy="13">${esc(dim.name)}</tspan></text>
+        </g>`);
+    });
+
+    // 사람 선. 강조한 사람은 맨 위에 그린다
+    const order = [...people].sort((a, b) => (a.slot === focusSlot) - (b.slot === focusSlot));
+    for (const p of order) {
+        const c = colorOf(p);
+        const values = DIMENSIONS.map((d) => radarValue(p, d));
+        const { closed, runs } = radarRuns(values);
+        const state = focusSlot === null ? '' : p.slot === focusSlot ? ' focus' : ' dim';
+        const g = [`<g class="person${state}" data-slot="${p.slot}">`];
+
+        for (const run of runs) {
+            const points = run.map((i) => pt(radarPoint(i, values[i]))).join(' ');
+            if (closed) g.push(`<polygon class="line" points="${points}" stroke="${c.fill}"/>`);
+            else if (run.length > 1) g.push(`<polyline class="line" points="${points}" stroke="${c.fill}"/>`);
+        }
+        values.forEach((v, i) => {
+            if (v === null) return;
+            const dim = DIMENSIONS[i];
+            const [x, y] = radarPoint(i, v);
+            const raw = scoreOf(p, dim.key);
+            const tipText = `${p.slot + 1} ${p.name}${p.demo ? ' (가상)' : ''} — ${dim.key} ${dim.reverse ? `원점수 ${raw} (역산 ${v})` : `${v}점`}`;
+            g.push(`<g class="vertex" data-tip="${esc(tipText)}" data-select="${dim.key}">
+                <circle class="hit" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9"/>
+                <circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="${c.fill}"/>
+            </g>`);
+            // 강조한 사람만 꼭짓점 값을 적는다 (모든 점에 숫자를 달지 않는다)
+            if (p.slot === focusSlot) {
+                const [lx, ly] = radarPoint(i, v + 0.75);
+                g.push(`<text class="value" x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}">${v}</text>`);
+            }
+        });
+        g.push('</g>');
+        parts.push(g.join(''));
+    }
+
+    chart.innerHTML = `<svg viewBox="0 0 ${RADAR.W} ${RADAR.H}" role="img" aria-label="10개 차원 레이더. NC는 역산값">${parts.join('')}</svg>`;
+
+    legend.innerHTML = people.map((p) => {
+        const missing = DIMENSIONS.filter((d) => scoreOf(p, d.key) === null).map((d) => d.key);
+        const pressed = p.slot === focusSlot;
+        return `<button type="button" class="rd-person${pressed ? ' on' : ''}${focusSlot !== null && !pressed ? ' off' : ''}"
+            data-focus="${p.slot}" aria-pressed="${pressed}">
+            <span class="swatch" style="background:${colorOf(p).fill}"></span>${personLabel(p)}
+            ${missing.length ? `<span class="missing" title="빈 점수: ${missing.join(', ')}">빈 ${missing.join('·')}</span>` : ''}
+        </button>`;
+    }).join('') + (focusSlot !== null ? '<button type="button" class="rd-all" data-focus="">모두 같게 보기</button>' : '');
+}
+
 function renderMatrix() {
     const table = $('mx-body');
     if (!people.length) {
@@ -277,11 +378,20 @@ function select(key) {
     for (const el of document.querySelectorAll('[data-select].sel')) el.classList.remove('sel');
     for (const el of document.querySelectorAll(`.dot-row[data-select="${key}"], .mx-row[data-select="${key}"]`)) el.classList.add('sel');
     renderEvidence();
+    renderRadar(); // 선택한 축 표시
     // 좁은 창에서는 근거가 아래에 있으니 보이도록 옮겨 준다
     if (matchMedia('(max-width: 900px)').matches) $('evidence').scrollIntoView({ block: 'start' });
 }
 
 document.addEventListener('click', (e) => {
+    const focus = e.target.closest('[data-focus]');
+    if (focus) {
+        // 같은 이름을 다시 누르면 강조를 푼다
+        const slot = focus.dataset.focus === '' ? null : Number(focus.dataset.focus);
+        focusSlot = slot === focusSlot ? null : slot;
+        renderRadar();
+        return;
+    }
     const seek = e.target.closest('[data-seek]');
     if (seek) {
         Video.seek(Number(seek.dataset.seek));
@@ -292,7 +402,7 @@ document.addEventListener('click', (e) => {
     if (target) select(target.dataset.select);
 });
 document.addEventListener('keydown', (e) => {
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('.dot-row, .mx-row')) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('.dot-row, .mx-row, .axis-label')) {
         e.preventDefault();
         select(e.target.dataset.select);
     }
@@ -306,12 +416,14 @@ function showTip(text, x, y) {
     tip.style.left = `${Math.min(window.innerWidth - w - 8, x + 12)}px`;
     tip.style.top = `${y - 34}px`;
 }
-$('dots-body').addEventListener('pointermove', (e) => {
-    const dot = e.target.closest('.dot');
-    if (dot) showTip(dot.dataset.tip, e.clientX, e.clientY);
-    else tip.hidden = true;
-});
-$('dots-body').addEventListener('pointerleave', () => { tip.hidden = true; });
+for (const id of ['dots-body', 'rd-chart']) {
+    $(id).addEventListener('pointermove', (e) => {
+        const target = e.target.closest('[data-tip]');
+        if (target) showTip(target.dataset.tip, e.clientX, e.clientY);
+        else tip.hidden = true;
+    });
+    $(id).addEventListener('pointerleave', () => { tip.hidden = true; });
+}
 
 // ---------- 불러오기 ----------
 

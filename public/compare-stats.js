@@ -79,6 +79,35 @@ function personDomains(person) {
     return domainAverages(person.scores || {});
 }
 
+// 레이더에 그릴 값: NC(reverse)는 역산값, 빈 점수는 null
+function radarValue(person, dim) {
+    const s = scoreOf(person, dim.key);
+    if (s === null) return null;
+    return dim.reverse ? 8 - s : s;
+}
+
+// 빈 점수가 있으면 그 꼭짓점에서 선을 끊는다. 0점이나 이웃 값으로 잇지 않는다.
+// values: 꼭짓점 순서대로의 값(null 가능) → { closed, runs: [[꼭짓점 번호...], ...] }
+// 모두 있으면 닫힌 도형 하나. 아니면 빈 칸 사이의 연속 구간들(원형으로 이어 본다)
+function radarRuns(values) {
+    const n = values.length;
+    const present = values.map((v) => v !== null);
+    if (present.every(Boolean)) return { closed: true, runs: [values.map((_, i) => i)] };
+    const firstGap = present.indexOf(false);
+    const runs = [];
+    let current = [];
+    for (let k = 1; k <= n; k++) {
+        const i = (firstGap + k) % n;
+        if (present[i]) {
+            current.push(i);
+        } else {
+            if (current.length) runs.push(current);
+            current = [];
+        }
+    }
+    return { closed: false, runs };
+}
+
 // "[03:41]" "[1:02:05]" → 초
 function parseStamp(text) {
     const parts = text.replace(/[[\]]/g, '').split(':').map(Number);
@@ -101,5 +130,5 @@ function splitEvidence(text) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { scoreOf, comparePeople, dimStats, agreement, sortBySplit, topSplit, personDomains, splitEvidence, parseStamp };
+    module.exports = { scoreOf, comparePeople, dimStats, agreement, sortBySplit, topSplit, personDomains, splitEvidence, parseStamp, radarValue, radarRuns };
 }

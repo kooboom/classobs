@@ -398,6 +398,45 @@ body.has-bar { padding-bottom: var(--bar-h); }
     padding: 3px 8px; font-size: 12px; white-space: nowrap;
 }
 
+/* (3) 레이더 */
+.radar-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 170px; gap: 10px; align-items: start; }
+.radar-chart svg { width: 100%; height: auto; display: block; }
+.radar-chart .ring { fill: none; stroke: var(--line); stroke-width: 0.8; }
+.radar-chart .ring.outer { stroke: var(--rule); stroke-width: 1; }
+.radar-chart .ring-label { font-size: 10px; fill: var(--muted); }
+.radar-chart .spoke { stroke: var(--line); stroke-width: 0.8; }
+.radar-chart .spoke.sel { stroke: var(--navy); stroke-width: 2; }
+.radar-chart .axis-label { cursor: pointer; }
+.radar-chart .axis-label .ab { font-size: 13px; font-weight: bold; fill: var(--navy); }
+.radar-chart .axis-label .nm { font-size: 10.5px; fill: var(--muted); }
+.radar-chart .axis-label.rev .ab { fill: var(--crimson); }
+.radar-chart .axis-label.sel .ab { text-decoration: underline; }
+.radar-chart .axis-label:hover .ab { text-decoration: underline; }
+.radar-chart .axis-label:focus { outline: none; }
+.radar-chart .axis-label:focus-visible .ab { fill: var(--ink); }
+.radar-chart .line { fill: none; stroke-width: 2; stroke-linejoin: round; opacity: 0.85; }
+.radar-chart .mark { stroke: #fff; stroke-width: 1.5; }
+.radar-chart .hit { fill: transparent; }
+.radar-chart .vertex { cursor: pointer; }
+.radar-chart .person.dim { opacity: 0.15; }
+.radar-chart .person.focus .line { stroke-width: 3; opacity: 1; }
+.radar-chart .person.focus .mark { r: 5; }
+.radar-chart .value { font-size: 12px; font-weight: bold; fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: #fff; stroke-width: 3px; }
+
+.radar-legend { display: flex; flex-direction: column; gap: 2px; }
+.rd-person, .rd-all {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 2px;
+    width: 100%; padding: 3px 6px; text-align: left;
+    border: 1px solid transparent; background: none; font-size: 13px;
+}
+.rd-person:hover { border-color: var(--line); }
+.rd-person.on { border-color: var(--navy); background: var(--navy-bg); font-weight: bold; }
+.rd-person.off { opacity: 0.45; }
+.rd-person .swatch { display: inline-block; width: 14px; height: 3px; margin-right: 4px; }
+.rd-person .missing { flex-basis: 100%; padding-left: 18px; font-size: 11px; color: var(--muted); font-weight: normal; }
+.rd-all { color: var(--navy); text-decoration: underline; font-size: 12px; margin-top: 4px; }
+.radar-note { margin-top: 4px; font-size: 12px; color: var(--muted); }
+
 /* (4) 매트릭스 */
 .bands { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; margin-bottom: 6px; }
 .band { padding: 0 8px; border: 1px solid var(--line); }
@@ -477,15 +516,17 @@ body.has-bar { padding-bottom: var(--bar-h); }
     /* 넓은 매트릭스가 한 단 칸을 밀어 넓히지 않게 — 넘치는 표는 표 안에서만 가로 스크롤 */
     .layout.cmp { grid-template-columns: minmax(0, 1fr); }
     .cmp .player, .cmp .legend, .cmp .block, .cmp .demo-tools { min-width: 0; }
-    /* 한 단일 때는 SPEC 순서대로: 요약 → 점 그래프 → 매트릭스 → 근거 → 종합 의견 */
+    /* 한 단일 때는 SPEC 순서대로: 요약 → 점 그래프 → 레이더 → 매트릭스 → 근거 → 종합 의견 */
     .cmp .player { order: 0; }
     .cmp .legend { order: 1; margin-top: 8px; }
     .cmp #summary { order: 2; }
     .cmp #dots { order: 3; }
-    .cmp #matrix { order: 4; }
-    .cmp .evidence-panel { order: 5; overflow: visible; }
-    .cmp #comments { order: 6; }
-    .cmp .demo-tools { order: 7; }
+    .cmp #radar { order: 4; }
+    .cmp #matrix { order: 5; }
+    .cmp .evidence-panel { order: 6; overflow: visible; }
+    .cmp #comments { order: 7; }
+    .cmp .demo-tools { order: 8; }
+    .radar-wrap { grid-template-columns: minmax(0, 1fr) 150px; }
     .cmp .block { margin-top: 0; }
     .tiles { grid-template-columns: 1fr 1fr; }
     .tile-top { grid-column: 1 / -1; }
