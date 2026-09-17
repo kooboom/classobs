@@ -1,0 +1,6 @@
+# 이 폴더는 Apache가 파일로 내보내면 안 된다 (학생 기록 data/, .git, 서버 코드가 들어 있다).
+# 앱은 Apache 프록시 → Node(127.0.0.1:3003)로만 서비스한다. 프록시 요청은 이 파일을 읽지 않는다.
+#
+# 이 파일은 예비 장치다. 주 차단은 deploy/apache-classobs-deny.conf (서버 전체 설정).
+# 서버가 .htaccess 를 무시하도록(AllowOverride None) 되어 있으면 이 파일만으로는 막히지 않는다.
+Require all denied

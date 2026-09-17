@@ -561,3 +561,92 @@ body.has-bar { padding-bottom: var(--bar-h); }
 .session-list .code-cell { font-weight: bold; color: var(--navy); font-size: 15px; letter-spacing: 0.08em; }
 .session-list .links a { color: var(--navy); }
 .newpage footer.legal { margin: 24px 0 0; }
+
+/* ════════════════ 인쇄 — 비교 화면을 A4 토론 기록지로 ════════════════
+   영상·버튼·입력칸은 숨기고, (1)~(6)을 순서대로 한 단에 싣는다.
+   (5) 근거는 화면의 선택 칸 대신 10개 차원 전부를 싣는 인쇄용 블록을 쓴다. */
+
+.print-only { display: none; }
+
+@media print {
+    @page { size: A4 portrait; margin: 12mm 12mm 14mm; }
+
+    html, body { font-size: 9pt; background: #fff; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } /* 구간 색·번호 칩을 인쇄에도 남긴다 */
+    .print-only { display: block; }
+    #printed-at { display: inline; margin-left: 8px; }
+
+    /* 숨길 것: 영상, 화면용 근거 칸, 버튼류, 툴팁, 갱신 시각, 채점 화면 링크 */
+    .player, .cmp .evidence-panel, .demo-tools, .tip, #updated, #back, .rd-all { display: none !important; }
+
+    .top { padding: 0 0 3px; }
+    .top h1 { font-size: 14pt; }
+    .top h1 small { font-size: 8pt; }
+
+    /* 한 단, SPEC 순서 */
+    .layout.cmp { display: block; padding: 0; }
+    .cmp .stage { display: none; }
+    .cmp .work { display: block; }
+    .block { margin-top: 5mm; }
+    .block h2 { font-size: 11pt; break-after: avoid; }
+    .block h2 small { font-size: 8pt; }
+    .legend { font-size: 8.5pt; margin-top: 3mm; }
+
+    /* 화면 전용 강조는 인쇄에서 뺀다 */
+    .sel, .dot-row.sel, .mx-row.sel .mx-dim { background: transparent !important; }
+    .dot-row.sel { border-left-color: transparent; }
+    .dot-row.rev, .dot-row.rev.sel { background: var(--crimson-bg) !important; }
+    .linklike { color: var(--ink); text-decoration: none; }
+
+    /* (1) 요약 */
+    .tiles { grid-template-columns: 1fr 1fr 1.6fr; break-inside: avoid; }
+    .tile-top { grid-column: auto; }
+    .tile-value { font-size: 18pt; }
+
+    /* (2) 점 그래프: 한 줄이 쪽 사이에서 잘리지 않게 */
+    /* 그래프 폭을 고정해 모든 줄이 같은 배율로 낮게 그려지게 한다 */
+    .dot-row { grid-template-columns: 34mm 100mm 1fr; break-inside: avoid; padding: 1px 4px; }
+    .dot-row svg { width: 100mm; }
+    .dot-label { font-size: 9pt; }
+    .dot-stats { font-size: 8pt; }
+    .dot-stats b { font-size: 9.5pt; }
+
+    /* (3) 레이더: 차트와 범례를 한 덩어리로 */
+    #radar { break-inside: avoid; }
+    .radar-wrap { grid-template-columns: 120mm 1fr; }
+    .rd-person { font-size: 8.5pt; padding: 1px 4px; border: none !important; background: none !important; }
+    .rd-person.off { opacity: 0.6; }
+    .radar-note { font-size: 8pt; }
+
+    /* (4) 매트릭스: 가로 스크롤 없이 쪽 폭에 맞춘다 */
+    .scroll-x { overflow: visible; }
+    #matrix { break-inside: avoid; } /* 한 쪽에 통째로 */
+    .mx { width: 100%; font-size: 8pt; }
+    .mx th, .mx td { padding: 1px 2px; white-space: nowrap; }
+    .mx .mx-person { font-size: 7.5pt; line-height: 1.25; }
+    .mx .mx-person .chip { display: block; width: fit-content; margin: 0 auto 1px; }
+    .mx .mx-person .demo-badge { display: block; width: fit-content; margin: 1px auto 0; font-size: 6.5pt; line-height: 1.3; }
+    .mx-cell small, .mx-stat small { font-size: 6.5pt; }
+    .mx-domain small { display: block; }
+    .bands { font-size: 8pt; }
+
+    /* (5) 근거 전부 */
+    #print-evidence .prompt { position: static; margin: 0 0 2mm; padding: 2mm 3mm; font-size: 9pt; border: 1px solid var(--line); }
+    .pev-dim { break-inside: avoid; margin-top: 2.5mm; }
+    .pev-head { font-size: 9.5pt; color: var(--navy); border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+    .pev-dim.rev .pev-head { color: var(--crimson); }
+    .pev-head .abbr { display: inline-block; min-width: 9mm; font-size: 8pt; line-height: 1.5; }
+    .pev-dim.rev .abbr { border-color: var(--crimson); color: var(--crimson); }
+    .pev-head .muted { font-size: 8pt; margin-left: 2mm; }
+    .pev-dim ol { list-style: none; margin: 1mm 0 0; }
+    .pev-dim li { display: grid; grid-template-columns: 17mm 1fr; font-size: 8.5pt; line-height: 1.45; }
+    .pev-score { white-space: nowrap; }
+    .pev-score small { font-weight: normal; color: var(--muted); }
+
+    /* (6) 종합 의견 */
+    .cards { grid-template-columns: 1fr 1fr; gap: 3mm; }
+    .card { break-inside: avoid; font-size: 8.5pt; }
+
+    footer.legal { margin: 6mm 0 0; font-size: 7.5pt; }
+    a { color: inherit; text-decoration: none; }
+}

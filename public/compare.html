@@ -10,7 +10,7 @@
 <header class="top">
     <h1><span id="title">CLASS 관찰 비교</span><small id="subtitle"></small></h1>
     <div class="who">
-        <b id="counts">불러오는 중…</b><span id="updated" aria-live="polite"></span>
+        <b id="counts">불러오는 중…</b><span id="updated" aria-live="polite"></span><span id="printed-at" class="print-only"></span>
         <a id="back" class="toplink" hidden>채점 화면으로</a>
     </div>
 </header>
@@ -73,6 +73,13 @@
                 <span class="muted">NC는 원점수 (역산값)</span>
             </div>
             <div class="scroll-x"><table id="mx-body" class="mx"></table></div>
+        </section>
+
+        <!-- (5) 인쇄용 근거 — 화면의 근거 칸은 고른 차원 하나만 보이므로, 인쇄에는 10개 차원 전부를 싣는다 -->
+        <section id="print-evidence" class="block print-only" aria-hidden="true">
+            <h2>근거 나란히 보기 <small>불일치 폭이 큰 차원부터 · 점수 낮은 순</small></h2>
+            <p class="prompt">점수가 갈렸다면, 서로 <b>다른 장면을 근거로 삼은 것</b>인지 <b>같은 장면을 다르게 해석한 것</b>인지 먼저 확인하십시오.</p>
+            <div id="pev-body"></div>
         </section>
 
         <!-- (6) 종합 의견 카드 -->

@@ -74,6 +74,7 @@ function renderAll() {
     renderRadar();
     renderMatrix();
     renderEvidence();
+    renderPrintEvidence();
     renderComments();
 }
 
@@ -356,6 +357,28 @@ function renderEvidence() {
             </li>`).join('')}</ol>` : '<p class="empty">이 차원에 점수나 근거를 낸 사람이 없습니다.</p>'}`;
 }
 
+// 인쇄용: 10개 차원 전부의 근거. 타임스탬프는 글자 그대로
+function renderPrintEvidence() {
+    const body = $('pev-body');
+    if (!people.length) {
+        body.innerHTML = '<p class="empty">아직 제출한 사람이 없습니다.</p>';
+        return;
+    }
+    body.innerHTML = sortBySplit(stats).map((st) => {
+        const dim = st.dim;
+        const items = people
+            .map((p) => ({ p, s: scoreOf(p, dim.key), ev: p.scores?.[dim.key]?.ev || '' }))
+            .filter((it) => it.s !== null || it.ev)
+            .sort((a, b) => (a.s ?? 99) - (b.s ?? 99) || a.p.slot - b.p.slot);
+        return `<div class="pev-dim${dim.reverse ? ' rev' : ''}">
+            <div class="pev-head"><span class="abbr">${dim.key}</span> <b>${esc(dim.name)}</b>
+                <span class="muted">평균 ${fmt1(st.mean)} · 폭 ${st.range === null ? '—' : st.range}${dim.reverse ? ' · 원점수, 낮을수록 좋음' : ''}</span></div>
+            ${items.length ? `<ol>${items.map((it) => `<li><b class="pev-score">${it.s === null ? '—' : `${it.s}점`}${dim.reverse && it.s !== null ? ` <small>(역산 ${8 - it.s})</small>` : ''}</b>
+                <span>${personLabel(it.p)} — ${it.ev ? esc(it.ev) : '<span class="muted">(근거 없음)</span>'}</span></li>`).join('')}</ol>` : '<p class="empty">점수나 근거 없음</p>'}
+        </div>`;
+    }).join('');
+}
+
 function renderComments() {
     const body = $('cm-body');
     const withComment = people.filter((p) => (p.comment || '').trim());
@@ -470,6 +493,12 @@ async function loadSubmissions() {
 const playerUI = bindPlayerUI();
 
 $('subtitle').textContent = `세션 ${CODE} · 5초마다 새 제출 반영`;
+
+// 인쇄한 기록지에 언제 뽑았는지 남긴다
+window.addEventListener('beforeprint', () => {
+    const now = new Date();
+    $('printed-at').textContent = `인쇄 ${now.toLocaleDateString('ko-KR')} ${stamp(now)}`;
+});
 if (NAME) {
     $('back').href = `score.html?code=${CODE}&name=${encodeURIComponent(NAME)}`;
     $('back').hidden = false;
