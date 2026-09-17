@@ -1,0 +1,16 @@
+{
+  "name": "classobs",
+  "version": "0.1.0",
+  "description": "CLASS 관찰 실습 앱 — 수업행동분석론",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

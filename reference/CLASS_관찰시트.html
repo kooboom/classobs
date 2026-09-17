@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CLASS 관찰시트 — A4 1장</title>
+<style>
+  :root{
+    --navy:#1b3a5f; --navy-bg:#e9eef4;
+    --crimson:#9b2335; --crimson-bg:#fbeef0;
+    --gold:#8a6d2f; --gold-bg:#faf5e8;
+    --line:#b9c3ce; --rule:#8d99a6;
+    --ink:#111; --muted:#4f5a66;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  @page{size:A4 portrait;margin:13mm 14mm;}
+
+  html,body{
+    font-family:'Malgun Gothic','맑은 고딕',sans-serif;
+    color:var(--ink);
+    font-size:9pt;
+    line-height:1.3;
+  }
+  body{background:#e6e9ec;padding:10mm 0;}
+  .sheet{
+    width:182mm;
+    margin:0 auto;
+    background:#fff;
+    padding:0;
+  }
+
+  /* ── 머리 ─────────────────────── */
+  .top{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    border-bottom:2.2pt solid var(--navy);
+    padding-bottom:1.2mm;
+  }
+  .top h1{font-size:14pt;color:var(--navy);letter-spacing:-.4px;}
+  .top h1 small{font-size:8pt;font-weight:normal;color:var(--muted);margin-left:3mm;letter-spacing:0;}
+  .top .ed{font-size:7.5pt;color:var(--muted);text-align:right;line-height:1.35;}
+  .top .ed b{color:var(--navy);}
+
+  /* ── 기재란 ───────────────────── */
+  .ctx{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0 4mm;
+    margin-top:1.8mm;
+  }
+  .ctx div{
+    font-size:7.5pt;
+    border-bottom:.5pt solid var(--rule);
+    padding:1.4mm .5mm .7mm;
+  }
+  .ctx b{color:var(--navy);font-weight:bold;margin-right:1.5mm;}
+  .ctx .w2{grid-column:span 2;}
+  .ctx .w4{grid-column:span 4;border-bottom:none;padding-bottom:0;}
+
+  /* ── 척도 + NC 규칙 ───────────── */
+  .scale{
+    display:flex;gap:0;margin-top:2.2mm;
+    border:.5pt solid var(--line);
+  }
+  .scale div{
+    flex:1;padding:1mm 2mm;font-size:7.5pt;color:var(--muted);
+    border-right:.5pt solid var(--line);
+  }
+  .scale div:last-child{border-right:none;}
+  .scale b{color:var(--navy);display:block;font-size:8.5pt;}
+
+  .ncrule{
+    background:var(--crimson-bg);
+    border-left:2.2pt solid var(--crimson);
+    padding:1.2mm 2.5mm;
+    font-size:7.5pt;
+    margin-top:1.4mm;
+    line-height:1.4;
+  }
+  .ncrule b{color:var(--crimson);}
+
+  /* ── 영역/차원 ────────────────── */
+  .dom{
+    margin-top:1.8mm;
+    background:var(--navy);color:#fff;
+    padding:1.1mm 2.5mm;
+    font-size:9pt;font-weight:bold;
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+  .dom em{font-style:normal;font-weight:normal;font-size:7.5pt;opacity:.9;}
+
+  table.dims{width:100%;border-collapse:collapse;}
+  table.dims td{
+    border-bottom:.5pt solid var(--line);
+    padding:.9mm 0 0;
+    vertical-align:top;
+  }
+  td.abbr{
+    width:10mm;
+    font-size:8.5pt;font-weight:bold;color:var(--navy);
+    padding-left:1.5mm;
+  }
+  td.nm{width:28mm;font-size:8.5pt;font-weight:bold;color:var(--navy);}
+  td.ind{font-size:7pt;color:var(--muted);line-height:1.35;padding-right:2mm;}
+  td.sc{width:44mm;text-align:right;padding-right:0;white-space:nowrap;}
+
+  .sc i{
+    font-style:normal;display:inline-block;
+    width:5.4mm;height:5.4mm;line-height:5mm;
+    text-align:center;border:.5pt solid var(--navy);border-radius:50%;
+    font-size:7.5pt;color:var(--navy);margin-left:.5mm;
+  }
+  tr.rev td{background:var(--crimson-bg);}
+  tr.rev td.abbr,tr.rev td.nm{color:var(--crimson);}
+  tr.rev .sc i{border-color:var(--crimson);color:var(--crimson);}
+  tr.rev td.ind b{color:var(--crimson);}
+
+  tr.ev td{
+    border-bottom:.5pt solid var(--line);
+    padding:0 1.5mm 4.6mm;
+    font-size:6.5pt;color:#97a2ad;
+  }
+  tr.ev.revbg td{background:var(--crimson-bg);}
+
+  /* ── 집계 ─────────────────────── */
+  .sum{
+    display:flex;gap:2.5mm;margin-top:2.6mm;
+  }
+  .sum div{
+    flex:1;
+    border:.5pt solid var(--line);border-top:1.8pt solid var(--gold);
+    background:var(--gold-bg);
+    padding:1.2mm 2mm .8mm;
+    font-size:7pt;
+  }
+  .sum b{color:var(--gold);display:block;font-size:8.5pt;margin-bottom:.2mm;}
+  .sum span{
+    display:block;height:4.6mm;border-bottom:.8pt solid var(--ink);
+    margin-top:.6mm;
+  }
+
+  .memos{display:flex;gap:2.5mm;margin-top:2.0mm;}
+  .memo{
+    flex:1;
+    border:.5pt solid var(--line);
+    padding:1.1mm 2.5mm 0;
+  }
+  .memo b{color:var(--navy);font-size:8pt;}
+  .memo em{font-style:normal;font-weight:normal;color:var(--muted);font-size:6.5pt;margin-left:1.5mm;}
+  .memo p{border-bottom:.5pt dotted var(--rule);height:4.8mm;margin-top:.8mm;}
+  .memo p:last-child{border-bottom:none;}
+
+  footer{
+    margin-top:1.8mm;border-top:.5pt solid var(--line);padding-top:1mm;
+    font-size:6.5pt;color:var(--muted);line-height:1.38;
+  }
+  footer b{color:var(--navy);}
+
+  @media print{
+    body{background:#fff;padding:0;}
+    .sheet{width:auto;}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<div class="top">
+  <h1>CLASS 관찰시트<small>Classroom Assessment Scoring System · Pre-K / K-3 판</small></h1>
+  <div class="ed">3개 영역 · 10개 차원 · 1~7점<br><b>사이클 1회당 1장</b></div>
+</div>
+
+<div class="ctx">
+  <div><b>교사</b></div>
+  <div><b>관찰자</b></div>
+  <div><b>학교·학급</b></div>
+  <div><b>아동 수</b></div>
+  <div><b>관찰일</b></div>
+  <div><b>시작 — 종료</b></div>
+  <div><b>사이클</b> ___ / 4</div>
+  <div><b>학년</b></div>
+  <div class="w4" style="font-size:7.5pt;padding-top:1.4mm;">
+    <b style="color:#1b3a5f;">활동 상황</b>
+    □ 자유선택 &nbsp; □ 대집단 &nbsp; □ 소집단 &nbsp; □ 일상돌봄 &nbsp; □ 전환 &nbsp; □ 실외
+  </div>
+</div>
+
+<div class="scale">
+  <div><b>낮음 1–2</b>드물거나 짧고 표면적인 수준</div>
+  <div><b>중간 3–5</b>가끔, 또는 일부 학생에게만</div>
+  <div><b>높음 6–7</b>뚜렷하고 일관되게 지속, 전체 학생</div>
+  <div><b>채점 근거</b>빈도 · 깊이 · 지속 시간을 함께 본다</div>
+</div>
+
+<div class="ncrule">
+  <b>NC는 원점수를 적습니다.</b> 부정성이 클수록 높은 점수, 거의 없으면 1점 — 방향은 다른 아홉 차원과 같습니다(나타난 만큼 높은 점수).
+  다만 <b>정서적 지원 평균을 낼 때만 8 − 원점수로 역산</b>합니다. 예: 원점수 2 → 6으로 환산.
+</div>
+
+<!-- 영역 1 -->
+<div class="dom"><span>영역 1 · 정서적 지원 Emotional Support</span><em>학생들이 안전하고 지지받는다고 느끼는가</em></div>
+<table class="dims">
+  <tr>
+    <td class="abbr">PC</td><td class="nm">긍정적 분위기</td>
+    <td class="ind">관계 · 긍정적 정서 · 긍정적 의사소통 · 존중</td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev"><td colspan="4">근거</td></tr>
+
+  <tr class="rev">
+    <td class="abbr">NC</td><td class="nm">부정적 분위기</td>
+    <td class="ind">부정적 정서 · 징벌적 통제 · 비꼼과 무례 · 심각한 부정성 &nbsp;<b>| 원점수 · 강도도 함께</b></td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev revbg"><td colspan="4">근거</td></tr>
+
+  <tr>
+    <td class="abbr">TS</td><td class="nm">교사 민감성</td>
+    <td class="ind">인식력 · 반응성 · 문제의 효과적 해결 · 학생 안정감</td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev"><td colspan="4">근거</td></tr>
+
+  <tr>
+    <td class="abbr">RSP</td><td class="nm">학생 관점 존중</td>
+    <td class="ind">학생 관심사와 동기 · 자율성과 리더십 지원 · 의미 있는 토론 · 움직임 제한</td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev"><td colspan="4">근거</td></tr>
+</table>
+
+<!-- 영역 2 -->
+<div class="dom"><span>영역 2 · 교실 조직 Classroom Organization</span><em>교실이 효율적으로 운영되고 있는가</em></div>
+<table class="dims">
+  <tr>
+    <td class="abbr">BM</td><td class="nm">행동 관리</td>
+    <td class="ind">명확한 행동 기대 · 사전 예방적 접근 · 문제행동 재지시 · 학생 행동</td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev"><td colspan="4">근거</td></tr>
+
+  <tr>
+    <td class="abbr">P</td><td class="nm">생산성</td>
+    <td class="ind">학습시간 극대화 · 루틴 · 전환 · 준비 &nbsp;| 전환 장면을 적는다</td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev"><td colspan="4">근거</td></tr>
+
+  <tr>
+    <td class="abbr">ILF</td><td class="nm">교수학습 형식</td>
+    <td class="ind">효과적 촉진 · 다양한 방법과 자료 · 학생 흥미 · 명확한 학습 목표</td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev"><td colspan="4">근거</td></tr>
+</table>
+
+<!-- 영역 3 -->
+<div class="dom"><span>영역 3 · 교수적 지원 Instructional Support</span><em>학생들이 깊이 있게 배우고 있는가</em></div>
+<table class="dims">
+  <tr>
+    <td class="abbr">CD</td><td class="nm">개념 발달</td>
+    <td class="ind">분석과 추론 · 창작 · 통합 · 실생활 연결 &nbsp;| 교사의 질문을 그대로 옮긴다</td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev"><td colspan="4">근거</td></tr>
+
+  <tr>
+    <td class="abbr">QF</td><td class="nm">피드백의 질</td>
+    <td class="ind">비계설정 · 피드백 순환 · 사고과정 촉진 · 정보 제공 · 격려와 확언</td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev"><td colspan="4">근거</td></tr>
+
+  <tr>
+    <td class="abbr">LM</td><td class="nm">언어 모델링</td>
+    <td class="ind">잦은 대화 · 개방형 질문 · 반복과 확장 · 자기 및 병행 서술 · 고급 언어</td>
+    <td class="sc"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></td>
+  </tr>
+  <tr class="ev"><td colspan="4">근거</td></tr>
+</table>
+
+<!-- 집계 -->
+<div class="sum">
+  <div><b>정서적 지원</b>( PC + (8−NC) + TS + RSP ) ÷ 4<span></span></div>
+  <div><b>교실 조직</b>( BM + P + ILF ) ÷ 3<span></span></div>
+  <div><b>교수적 지원</b>( CD + QF + LM ) ÷ 3<span></span></div>
+</div>
+
+<div class="memos">
+  <div class="memo">
+    <b>관찰 메모</b><em>맥락 · 특이사항</em>
+    <p></p><p></p>
+  </div>
+  <div class="memo">
+    <b>종합 의견</b><em>교사에게 전달할 것</em>
+    <p></p><p></p>
+  </div>
+</div>
+
+<footer>
+  <b>관찰 절차</b> 20분 관찰 + 10분 채점 = 1사이클, 최소 4회(권장 6회) · 전체 2~3시간. 관찰 중에는 보기만 하고 채점 시간에 점수를 매긴다. 사이클마다 새 시트를 쓰고 마지막에 차원별로 평균을 낸다.<br>
+  <b>출처</b> 공개된 CLASS 연구 논문을 바탕으로 교육 목적으로 재구성한 양식이며 공식 Teachstone 인증 도구가 아니다. 저작권은 Teachstone Training, LLC. &nbsp;·&nbsp; 수업행동분석론 관찰 실습용
+</footer>
+
+</div>
+</body>
+</html>
